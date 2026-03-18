@@ -3,58 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NOVASTAR - Pro Pixel Mapper</title>
+    <title>NOVASTAR - Designer Pixel Mapper</title>
     <style>
         :root {
             --bg-body: #0d1117; --bg-container: #161b22; --text-main: #c9d1d9;
-            --primary: #238636; --accent: #58a6ff; --border: #30363d; --input-bg: #0d1117;
+            --primary: #30363d; --accent: #58a6ff; --border: #444c56; --input-bg: #0d1117;
         }
         [data-theme="light"] {
             --bg-body: #f6f8fa; --bg-container: #ffffff; --text-main: #24292f;
-            --primary: #2da44e; --border: #d0d7de; --input-bg: #ffffff;
+            --primary: #d0d7de; --border: #afb8c1; --input-bg: #ffffff;
         }
 
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg-body); color: var(--text-main); margin: 0; padding: 15px; transition: 0.3s; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-body); color: var(--text-main); margin: 0; padding: 15px; transition: 0.3s; }
         .container { max-width: 1200px; margin: auto; background: var(--bg-container); padding: 25px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.4); }
         
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-        .logo { font-weight: 800; font-size: 1.2em; color: var(--accent); }
+        .logo { font-weight: 800; font-size: 1.2em; color: var(--accent); letter-spacing: 1px; }
         
         .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
-        label { font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; display: block; opacity: 0.8; }
+        label { font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; display: block; color: var(--text-main); opacity: 0.7; }
         input, select { width: 100%; padding: 8px; background: var(--input-bg); border: 1px solid var(--border); color: var(--text-main); border-radius: 6px; outline: none; font-size: 13px; }
 
         .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
-        .stat-card { background: rgba(88, 166, 255, 0.05); border: 1px solid var(--border); padding: 12px; border-radius: 8px; text-align: center; }
-        .stat-label { font-size: 9px; opacity: 0.6; display: block; margin-bottom: 3px; text-transform: uppercase; }
-        .stat-val { font-size: 1.2em; font-weight: 700; }
+        .stat-card { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); padding: 12px; border-radius: 8px; text-align: center; }
+        .stat-label { font-size: 9px; opacity: 0.5; display: block; margin-bottom: 3px; text-transform: uppercase; }
+        .stat-val { font-size: 1.2em; font-weight: 700; color: var(--accent); }
 
         .progress-bg { background: #30363d; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 5px; }
-        .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: 0.5s; }
+        .progress-fill { height: 100%; background: #58a6ff; width: 0%; transition: 0.5s; }
 
-        /* Contenedor del Mapa: Sin scrollbars */
         .canvas-area { 
-            background: #050505; 
-            padding: 15px; 
+            background: #1a1a1a; 
+            padding: 20px; 
             border-radius: 8px; 
             border: 1px solid var(--border); 
             display: flex; 
             justify-content: center; 
             align-items: center;
-            overflow: hidden; /* Evita deslizadores */
+            overflow: hidden;
         }
 
-        /* Canvas: Escala visual automática para caber en pantalla */
         canvas { 
             max-width: 100%; 
             height: auto !important; 
             display: block;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
-            image-rendering: pixelated; /* Mantiene bordes nítidos al escalar */
+            box-shadow: 0 0 30px rgba(0,0,0,1);
+            image-rendering: auto;
         }
 
-        .btn { padding: 10px; width: 100%; background: var(--accent); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 15px; transition: 0.2s; }
-        .btn:hover { background: #4592ef; }
+        .btn { padding: 12px; width: 100%; background: var(--accent); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 15px; transition: 0.2s; }
+        .btn:hover { background: #4592ef; transform: translateY(-1px); }
         .btn-theme { background: transparent; color: var(--text-main); border: 1px solid var(--border); width: auto; font-size: 0.75em; padding: 5px 10px; margin-top: 0; }
     </style>
 </head>
@@ -62,15 +60,15 @@
 
 <div class="container">
     <div class="header">
-        <div class="logo">NOVA<span style="color:var(--text-main)">STAR</span> <span style="font-weight: 300;">COEX</span></div>
+        <div class="logo">NOVA<span style="color:var(--text-main)">STAR</span> <span style="font-weight: 300; font-size: 0.8em;">PIXEL MAPPER</span></div>
         <button class="btn btn-theme" onclick="toggleTheme()" id="themeBtn">Modo Claro</button>
     </div>
 
     <div class="grid-inputs">
         <div><label>Píxeles Panel (H)</label><input type="number" id="pw" value="192" oninput="run()"></div>
         <div><label>Píxeles Panel (V)</label><input type="number" id="ph" value="192" oninput="run()"></div>
-        <div><label>Columnas</label><input type="number" id="cols" value="10" oninput="run()"></div>
-        <div><label>Filas</label><input type="number" id="rows" value="6" oninput="run()"></div>
+        <div><label>Nº Columnas</label><input type="number" id="cols" value="12" oninput="run()"></div>
+        <div><label>Nº Filas</label><input type="number" id="rows" value="6" oninput="run()"></div>
         <div><label>Frecuencia</label>
             <select id="hz" onchange="run()">
                 <option value="50">50 Hz</option>
@@ -80,11 +78,11 @@
     </div>
 
     <div class="stats-row">
-        <div class="stat-card"><span class="stat-label">Resolución</span><span class="stat-val" id="res">0 x 0</span></div>
-        <div class="stat-card"><span class="stat-label">Total Píxeles</span><span class="stat-val" id="totalPx">0</span></div>
-        <div class="stat-card"><span class="stat-label">Puertos de Red</span><span class="stat-val" id="ports" style="color:var(--accent)">0</span></div>
+        <div class="stat-card"><span class="stat-label">Resolución Nativa</span><span class="stat-val" id="res">0 x 0</span></div>
+        <div class="stat-card"><span class="stat-label">Píxeles Totales</span><span class="stat-val" id="totalPx">0</span></div>
+        <div class="stat-card"><span class="stat-label">Puertos 1G Requeridos</span><span class="stat-val" id="ports">0</span></div>
         <div class="stat-card">
-            <span class="stat-label">Carga por Puerto (%)</span>
+            <span class="stat-label">Carga del Sistema</span>
             <span class="stat-val" id="loadTxt">0%</span>
             <div class="progress-bg"><div class="progress-fill" id="loadBar"></div></div>
         </div>
@@ -94,7 +92,7 @@
         <canvas id="mapCanvas"></canvas>
     </div>
 
-    <button class="btn" onclick="exportIMG()">Exportar Pixel Map (Tamaño Real PNG)</button>
+    <button class="btn" onclick="exportIMG()">Descargar Pixel Map de Alta Calidad</button>
 </div>
 
 <script>
@@ -120,51 +118,65 @@
         
         const bar = document.getElementById('loadBar');
         bar.style.width = load + "%";
-        bar.style.background = load > 92 ? "#f85149" : (load > 75 ? "#d29922" : "#238636");
+        bar.style.background = load > 92 ? "#f85149" : (load > 75 ? "#d29922" : "#39d353");
 
-        // Configuración del Canvas a TAMAÑO REAL
         const canvas = document.getElementById('mapCanvas');
         const ctx = canvas.getContext('2d');
         canvas.width = totalW;
         canvas.height = totalH;
 
-        // Dibujo técnico
-        ctx.fillStyle = "#000";
+        ctx.fillStyle = "#111";
         ctx.fillRect(0,0, totalW, totalH);
-
-        const fontSize = Math.max(12, pw / 6); // Asegura legibilidad en paneles pequeños
 
         for(let i=0; i<cols; i++) {
             for(let j=0; j<rows; j++) {
-                // Bordes de cada gabinete
-                ctx.strokeStyle = "#58a6ff";
-                ctx.lineWidth = 1.5;
-                ctx.strokeRect(i*pw, j*ph, pw, ph);
+                // Alternancia de colores en escala de grises (Chessboard pattern)
+                const isEven = (i + j) % 2 === 0;
+                ctx.fillStyle = isEven ? "#2a2a2a" : "#1f1f1f";
                 
-                // Fondo sutil para cada panel
-                ctx.fillStyle = "rgba(88, 166, 255, 0.05)";
-                ctx.fillRect(i*pw + 1, j*ph + 1, pw - 2, ph - 2);
+                const x = i * pw;
+                const y = j * ph;
 
-                // Texto de coordenadas (C-F)
-                ctx.fillStyle = "rgba(88, 166, 255, 0.4)";
-                ctx.font = `bold ${fontSize}px sans-serif`;
+                // Dibujar el cuerpo del módulo
+                ctx.fillRect(x, y, pw, ph);
+                
+                // Borde interior sutil
+                ctx.strokeStyle = "rgba(255,255,255,0.05)";
+                ctx.lineWidth = 1;
+                ctx.strokeRect(x + 1, y + 1, pw - 2, ph - 2);
+
+                // Coordenadas en la parte inferior
+                const padding = ph * 0.1;
+                const fontSize = Math.max(10, ph / 12);
+                ctx.fillStyle = "rgba(255,255,255,0.5)";
+                ctx.font = `600 ${fontSize}px 'Inter', sans-serif`;
                 ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText(`C${i+1}-F${j+1}`, (i*pw)+(pw/2), (j*ph)+(ph/2));
+                ctx.textBaseline = "bottom";
+                
+                // Texto: C-F (Columna-Fila)
+                ctx.fillText(`C${i+1} : F${j+1}`, x + (pw/2), y + ph - padding);
+                
+                // Indicador visual de esquina (opcional, para diseño)
+                ctx.strokeStyle = "rgba(88, 166, 255, 0.2)";
+                ctx.beginPath();
+                ctx.moveTo(x + 5, y + 5);
+                ctx.lineTo(x + 15, y + 5);
+                ctx.moveTo(x + 5, y + 5);
+                ctx.lineTo(x + 5, y + 15);
+                ctx.stroke();
             }
         }
         
-        // Borde exterior maestro
-        ctx.strokeStyle = "#58a6ff";
-        ctx.lineWidth = 4;
+        // Marco exterior
+        ctx.strokeStyle = "#444";
+        ctx.lineWidth = 2;
         ctx.strokeRect(0, 0, totalW, totalH);
     }
 
     function exportIMG() {
         const c = document.getElementById('mapCanvas');
         const link = document.createElement('a');
-        const date = new Date().toISOString().slice(0,10);
-        link.download = `NovaStar_Layout_${c.width}x${c.height}_${date}.png`;
+        link.download = `NovaStar_PixelMap_${c.width}x${c.height}.png`;
         link.href = c.toDataURL("image/png");
         link.click();
     }
