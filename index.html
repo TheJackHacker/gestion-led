@@ -3,26 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora NovaStar COEX - Pro Tool</title>
+    <title>Calculadora NovaStar COEX - Pro Tool v2</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 5px solid #0052cc; }
-        h1 { color: #0052cc; text-align: center; margin-bottom: 5px; }
-        p.subtitle { text-align: center; color: #666; margin-bottom: 30px; }
+        /* Definición de Variables de Color para fácil cambio */
+        :root {
+            --bg-body: #f4f7f6;
+            --bg-container: #ffffff;
+            --text-main: #333333;
+            --text-muted: #666666;
+            --border-color: #dddddd;
+            --primary-color: #0052cc; /* Azul NovaStar */
+            --accent-color: #d32f2f; /* Rojo para valores */
+            --bg-results: #eef2f7;
+            --border-results: #dce3eb;
+            --input-bg: #ffffff;
+            --shadow: rgba(0,0,0,0.1);
+        }
+
+        /* Variables para Modo Oscuro */
+        [data-theme="dark"] {
+            --bg-body: #121212;
+            --bg-container: #1e1e1e;
+            --text-main: #e0e0e0;
+            --text-muted: #aaaaaa;
+            --border-color: #333333;
+            --primary-color: #4da3ff; /* Azul más claro para contraste */
+            --accent-color: #ff5252;
+            --bg-results: #252525;
+            --border-results: #3a3a3a;
+            --input-bg: #2d2d2d;
+            --shadow: rgba(0,0,0,0.5);
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: var(--bg-body); 
+            color: var(--text-main); 
+            margin: 0; 
+            padding: 20px; 
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container { 
+            max-width: 800px; 
+            margin: 50px auto auto auto; /* Espacio para el selector */
+            background: var(--bg-container); 
+            padding: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px var(--shadow); 
+            border-top: 5px solid var(--primary-color); 
+            position: relative;
+            transition: background-color 0.3s;
+        }
+
+        /* Estilos del Selector de Modo Oscuro */
+        .theme-switch-wrapper {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 0.8em;
+            color: var(--text-muted);
+        }
+        .theme-switch {
+            display: inline-block;
+            height: 24px;
+            position: relative;
+            width: 50px;
+            margin-left: 10px;
+        }
+        .theme-switch input { display:none; }
+        .slider {
+            background-color: #ccc;
+            bottom: 0;
+            cursor: pointer;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            background-color: white;
+            bottom: 4px;
+            content: "";
+            height: 16px;
+            left: 4px;
+            position: absolute;
+            transition: .4s;
+            width: 16px;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        h1 { color: var(--primary-color); text-align: center; margin-bottom: 5px; margin-top: 10px; }
+        p.subtitle { text-align: center; color: var(--text-muted); margin-bottom: 30px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } } /* Responsive */
+
         .input-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        .results { margin-top: 30px; padding: 20px; background: #eef2f7; border-radius: 8px; }
-        .results h2 { margin-top: 0; font-size: 1.2em; color: #0052cc; }
-        .res-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #dce3eb; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; color: var(--text-main); }
+        input, select { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid var(--border-color); 
+            border-radius: 6px; 
+            box-sizing: border-box; 
+            background-color: var(--input-bg);
+            color: var(--text-main);
+            transition: background-color 0.3s, border 0.3s;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--primary-color); }
+
+        .results { margin-top: 30px; padding: 20px; background: var(--bg-results); border-radius: 8px; transition: background-color 0.3s; }
+        .results h2 { margin-top: 0; font-size: 1.2em; color: var(--primary-color); }
+        .res-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-results); }
         .res-item:last-child { border-bottom: none; }
-        .value { font-weight: bold; color: #d32f2f; }
-        .warning { font-size: 0.8em; color: #666; font-style: italic; margin-top: 15px; }
-        .header-logo { text-align: center; margin-bottom: 10px; font-weight: 900; font-size: 1.5em; letter-spacing: 2px; }
+        .value { font-weight: bold; color: var(--accent-color); }
+        .warning { font-size: 0.8em; color: var(--text-muted); font-style: italic; margin-top: 15px; }
+        .header-logo { text-align: center; margin-bottom: 0px; font-weight: 900; font-size: 1.5em; letter-spacing: 2px; color: var(--text-main); }
     </style>
 </head>
 <body>
+
+<div class="theme-switch-wrapper">
+    <span>Modo Oscuro</span>
+    <label class="theme-switch" for="checkbox">
+        <input type="checkbox" id="checkbox" />
+        <div class="slider round"></div>
+    </label>
+</div>
 
 <div class="container">
     <div class="header-logo">NOVA<span style="color:#0052cc">STAR</span> COEX</div>
@@ -32,15 +145,15 @@
     <div class="grid">
         <div class="input-group">
             <label>Píxeles Horizontales (H)</label>
-            <input type="number" id="pixH" value="1920" oninput="calcular()">
+            <input type="number" id="pixH" value="1920" oninput="calcular()" placeholder="Ej: 1920">
         </div>
         <div class="input-group">
             <label>Píxeles Verticales (V)</label>
-            <input type="number" id="pixV" value="1080" oninput="calcular()">
+            <input type="number" id="pixV" value="1080" oninput="calcular()" placeholder="Ej: 1080">
         </div>
         <div class="input-group">
             <label>Pixel Pitch (mm)</label>
-            <input type="number" id="pitch" value="2.6" step="0.1" oninput="calcular()">
+            <input type="number" id="pitch" value="2.6" step="0.1" oninput="calcular()" placeholder="Ej: 2.6">
         </div>
         <div class="input-group">
             <label>Frecuencia de Refresco (Hz)</label>
@@ -53,7 +166,7 @@
     </div>
 
     <div class="results">
-        <h2>Especificaciones Técnicas</h2>
+        <h2>Especificaciones Técnicas (Resultados)</h2>
         <div class="res-item">
             <span>Resolución Total:</span>
             <span class="value" id="totalPix">0 px</span>
@@ -71,47 +184,70 @@
             <span class="value" id="area">0 m²</span>
         </div>
         <div class="res-item">
-            <span>Puertos 1G Requeridos (Estándar):</span>
+            <span>Puertos 1G Requeridos (Estándar NovaStar):</span>
             <span class="value" id="ports">0</span>
         </div>
         
-        <p class="warning">* El cálculo de puertos se basa en una capacidad de 655,360 píxeles por cable (8-bit). Para COEX y VMP, consulte el ancho de banda específico según el modo de baja latencia.</p>
+        <p class="warning">* Este cálculo es una referencia de ingeniería. Para sistemas COEX que usen ancho de banda adaptativo o profundidades de color de 10/12-bit, verifique la capacidad exacta en el software VMP (Vision Management Platform).</p>
     </div>
 </div>
 
 <script>
-function calcular() {
-    // Obtener valores
-    const h = parseFloat(document.getElementById('pixH').value) || 0;
-    const v = parseFloat(document.getElementById('pixV').value) || 0;
-    const p = parseFloat(document.getElementById('pitch').value) || 0;
-    const hz = parseFloat(document.getElementById('refresh').value);
+    // --- Lógica de Cálculos ---
+    function calcular() {
+        const h = parseFloat(document.getElementById('pixH').value) || 0;
+        const v = parseFloat(document.getElementById('pixV').value) || 0;
+        const p = parseFloat(document.getElementById('pitch').value) || 0;
+        const hz = parseFloat(document.getElementById('refresh').value);
 
-    // Cálculos de píxeles
-    const total = h * v;
-    document.getElementById('totalPix').innerText = total.toLocaleString() + " px";
+        const total = h * v;
+        document.getElementById('totalPix').innerText = total.toLocaleString('es-ES') + " px";
 
-    // Cálculos de dimensiones (mm a m)
-    const widthMm = h * p;
-    const heightMm = v * p;
-    const areaM2 = (widthMm * heightMm) / 1000000;
+        const widthMm = h * p;
+        const heightMm = v * p;
+        const areaM2 = (widthMm * heightMm) / 1000000;
 
-    document.getElementById('dimH').innerText = widthMm.toLocaleString() + " mm (" + (widthMm/1000).toFixed(2) + " m)";
-    document.getElementById('dimV').innerText = heightMm.toLocaleString() + " mm (" + (heightMm/1000).toFixed(2) + " m)";
-    document.getElementById('area').innerText = areaM2.toFixed(2) + " m²";
+        document.getElementById('dimH').innerText = widthMm.toLocaleString('es-ES') + " mm (" + (widthMm/1000).toFixed(2) + " m)";
+        document.getElementById('dimV').innerText = heightMm.toLocaleString('es-ES') + " mm (" + (heightMm/1000).toFixed(2) + " m)";
+        document.getElementById('area').innerText = areaM2.toFixed(2) + " m²";
 
-    // Capacidad de señal (Cálculo aproximado NovaStar)
-    // Capacidad base 60Hz = 655,360. Si subes a 120Hz, la capacidad se divide por 2.
-    let capacidadPorPuerto = 655360;
-    if (hz === 120) capacidadPorPuerto = 327680;
-    if (hz === 30) capacidadPorPuerto = 1310720;
+        // Capacidad estándar de puerto 1G a 8-bit de profundidad de color
+        let capacidadPorPuerto = 655360; // Base a 60Hz
+        if (hz === 120) capacidadPorPuerto = 327680;
+        if (hz === 30) capacidadPorPuerto = 1310720;
 
-    const puertosNecesarios = Math.ceil(total / capacidadPorPuerto);
-    document.getElementById('ports').innerText = total > 0 ? puertosNecesarios : 0;
-}
+        const puertosNecesarios = Math.ceil(total / capacidadPorPuerto);
+        document.getElementById('ports').innerText = (total > 0 && h > 0 && v > 0) ? puertosNecesarios : 0;
+    }
 
-// Ejecutar al cargar
-calcular();
+    // --- Lógica del Modo Oscuro ---
+    const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+    const currentTheme = localStorage.getItem('theme');
+
+    // Comprobar si hay una preferencia guardada
+    if (currentTheme) {
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        if (currentTheme === 'dark') {
+            toggleSwitch.checked = true;
+        }
+    }
+
+    // Función para cambiar el tema
+    function switchTheme(e) {
+        if (e.target.checked) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark'); // Guardar preferencia
+        } else {
+            document.documentElement.setAttribute('data-theme', 'light');
+            localStorage.setItem('theme', 'light'); // Guardar preferencia
+        }
+    }
+
+    // Escuchar cambios en el switch
+    toggleSwitch.addEventListener('change', switchTheme, false);
+
+    // Ejecutar cálculo inicial
+    calcular();
 </script>
 
 </body>
