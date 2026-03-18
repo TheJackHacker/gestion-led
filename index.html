@@ -3,117 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NovaStar COEX - Pixel & Load Calculator</title>
+    <title>NOVASTAR - Cabinet Matrix Calculator</title>
     <style>
         :root {
-            --bg-body: #0a0c10; --bg-container: #161b22; --text-main: #c9d1d9;
-            --primary: #1f6feb; --accent: #39d353; --border: #30363d; --input-bg: #0d1117;
+            --bg-body: #0d1117; --bg-container: #161b22; --text-main: #c9d1d9;
+            --primary: #238636; --accent: #58a6ff; --border: #30363d; --input-bg: #0d1117;
         }
         [data-theme="light"] {
             --bg-body: #f6f8fa; --bg-container: #ffffff; --text-main: #24292f;
-            --primary: #0969da; --border: #d0d7de; --input-bg: #ffffff;
+            --primary: #2da44e; --border: #d0d7de; --input-bg: #ffffff;
         }
 
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: var(--bg-body); color: var(--text-main); margin: 0; padding: 20px; transition: 0.3s; }
-        .container { max-width: 1000px; margin: auto; background: var(--bg-container); padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); border: 1px solid var(--border); }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg-body); color: var(--text-main); margin: 0; padding: 20px; transition: 0.3s; }
+        .container { max-width: 1000px; margin: auto; background: var(--bg-container); padding: 25px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.4); }
         
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
-        .logo { font-weight: 700; font-size: 1.4em; color: var(--primary); }
+        .logo { font-weight: 800; font-size: 1.4em; letter-spacing: 1px; }
         
-        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        label { font-size: 12px; font-weight: 600; margin-bottom: 8px; display: block; opacity: 0.9; }
+        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        label { font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; display: block; color: var(--accent); }
         input, select { width: 100%; padding: 10px; background: var(--input-bg); border: 1px solid var(--border); color: var(--text-main); border-radius: 6px; outline: none; }
-        input:focus { border-color: var(--primary); ring: 2px rgba(31,111,235,0.3); }
+        input:focus { border-color: var(--accent); }
 
-        .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .stat-card { background: var(--input-bg); border: 1px solid var(--border); padding: 15px; border-radius: 8px; text-align: center; }
-        .stat-label { font-size: 11px; text-transform: uppercase; opacity: 0.7; margin-bottom: 5px; display: block; }
-        .stat-val { font-size: 1.4em; font-weight: 700; color: var(--primary); }
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: rgba(88, 166, 255, 0.05); border: 1px solid var(--border); padding: 15px; border-radius: 8px; text-align: center; }
+        .stat-label { font-size: 10px; opacity: 0.6; display: block; margin-bottom: 5px; }
+        .stat-val { font-size: 1.3em; font-weight: 700; }
 
-        .load-zone { margin-top: 10px; }
-        .bar-bg { background: #30363d; height: 10px; border-radius: 5px; overflow: hidden; margin-top: 5px; }
-        .bar-fill { height: 100%; background: var(--accent); width: 0%; transition: 0.5s ease-out; }
+        .load-container { margin-top: 10px; text-align: left; }
+        .progress-bg { background: #30363d; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 5px; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        .canvas-wrapper { background: #000; padding: 20px; border-radius: 8px; overflow: auto; border: 1px solid var(--border); margin-bottom: 20px; }
-        canvas { display: block; margin: auto; }
+        .canvas-area { background: #000; padding: 20px; border-radius: 8px; border: 1px solid var(--border); overflow: auto; display: flex; justify-content: center; }
+        canvas { box-shadow: 0 0 30px rgba(0,0,0,0.5); }
 
-        .btn { padding: 12px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); transition: 0.2s; background: var(--primary); color: white; width: 100%; }
-        .btn-theme { background: transparent; color: var(--text-main); width: auto; font-size: 0.8em; }
+        .btn { padding: 12px; width: 100%; background: var(--accent); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.2s; }
+        .btn:hover { filter: brightness(1.1); }
+        .btn-theme { background: transparent; color: var(--text-main); border: 1px solid var(--border); width: auto; font-size: 0.8em; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <div class="logo">NOVA<span style="color:var(--text-main)">STAR</span> <span style="font-weight: 300; font-size: 0.8em;">COEX CALC</span></div>
+        <div class="logo">NOVA<span style="color:var(--accent)">STAR</span> <small style="font-weight: 300;">COEX</small></div>
         <button class="btn btn-theme" onclick="toggleTheme()" id="themeBtn">Modo Claro</button>
     </div>
 
     <div class="grid-inputs">
-        <div><label>Píxeles Panel (H)</label><input type="number" id="pw" value="128" oninput="calculate()"></div>
-        <div><label>Píxeles Panel (V)</label><input type="number" id="ph" value="128" oninput="calculate()"></div>
-        <div><label>Ancho Pantalla (m)</label><input type="number" id="tw" value="4.0" step="0.1" oninput="calculate()"></div>
-        <div><label>Alto Pantalla (m)</label><input type="number" id="th" value="2.0" step="0.1" oninput="calculate()"></div>
-        <div><label>Frecuencia (Hz)</label>
-            <select id="hz" onchange="calculate()">
+        <div><label>Píxeles Panel (H)</label><input type="number" id="pw" value="128" oninput="run()"></div>
+        <div><label>Píxeles Panel (V)</label><input type="number" id="ph" value="128" oninput="run()"></div>
+        <div><label>Cantidad Columnas</label><input type="number" id="cols" value="8" oninput="run()"></div>
+        <div><label>Cantidad Filas</label><input type="number" id="rows" value="4" oninput="run()"></div>
+        <div><label>Frecuencia</label>
+            <select id="hz" onchange="run()">
                 <option value="50">50 Hz</option>
                 <option value="60" selected>60 Hz</option>
             </select>
         </div>
     </div>
 
-    <div class="stats-container">
-        <div class="stat-card"><span class="stat-label">Resolución Final</span><span class="stat-val" id="res">0 x 0</span></div>
-        <div class="stat-card"><span class="stat-label">Total Píxeles</span><span class="stat-val" id="totalPx">0</span></div>
-        <div class="stat-card"><span class="stat-label">Puertos de Red</span><span class="stat-val" id="ports">0</span></div>
+    <div class="stats-row">
         <div class="stat-card">
-            <span class="stat-label">Carga del Sistema</span>
-            <span class="stat-val" id="loadPerc" style="color:var(--accent)">0%</span>
-            <div class="bar-bg"><div class="bar-fill" id="loadBar"></div></div>
+            <span class="stat-label">Resolución Pantalla</span>
+            <span class="stat-val" id="res">0 x 0</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Total Píxeles</span>
+            <span class="stat-val" id="totalPx">0</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Puertos 1G Requeridos</span>
+            <span class="stat-val" id="ports" style="color:var(--accent)">0</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Carga por Puerto (%)</span>
+            <span class="stat-val" id="loadTxt">0%</span>
+            <div class="progress-bg"><div class="progress-fill" id="loadBar"></div></div>
         </div>
     </div>
 
-    <div class="canvas-wrapper">
+    <div class="canvas-area">
         <canvas id="mapCanvas"></canvas>
     </div>
 
-    <button class="btn" onclick="exportPNG()">Exportar Pixel Map</button>
+    <button class="btn" onclick="exportIMG()">Descargar Imagen Pixel Map</button>
 </div>
 
 <script>
-    function calculate() {
+    function run() {
         const pw = parseInt(document.getElementById('pw').value) || 1;
         const ph = parseInt(document.getElementById('ph').value) || 1;
-        const tw = parseFloat(document.getElementById('tw').value) || 0;
-        const th = parseFloat(document.getElementById('th').value) || 0;
+        const cols = parseInt(document.getElementById('cols').value) || 1;
+        const rows = parseInt(document.getElementById('rows').value) || 1;
         const hz = parseInt(document.getElementById('hz').value);
 
-        // Lógica: Asumimos que 1m equivale a una proporción estándar para el cálculo visual 
-        // (En configuración real, el número de paneles lo define el usuario según el diseño)
-        // Aquí estimamos paneles basándonos en una densidad de 500mm por panel para el dibujo
-        const cols = Math.max(1, Math.round(tw / 0.5));
-        const rows = Math.max(1, Math.round(th / 0.5));
-        
+        // Cálculos
         const totalW = cols * pw;
         const totalH = rows * ph;
         const totalPixels = totalW * totalH;
 
-        // Capacidad por puerto 1G NovaStar
+        // Capacidad NovaStar 1G Ethernet (8-bit)
+        // 60Hz: 655,360 píxeles | 50Hz: 786,432 píxeles
         const capacity = (hz === 60) ? 655360 : 786432;
         const ports = Math.ceil(totalPixels / capacity);
         const load = totalPixels > 0 ? (totalPixels / (ports * capacity)) * 100 : 0;
 
-        // UI
+        // Actualizar UI
         document.getElementById('res').innerText = `${totalW} x ${totalH}`;
         document.getElementById('totalPx').innerText = totalPixels.toLocaleString();
         document.getElementById('ports').innerText = totalPixels > 0 ? ports : 0;
-        document.getElementById('loadPerc').innerText = load.toFixed(1) + "%";
+        document.getElementById('loadTxt').innerText = load.toFixed(1) + "%";
         
         const bar = document.getElementById('loadBar');
         bar.style.width = load + "%";
-        bar.style.background = load > 90 ? "#f85149" : (load > 75 ? "#dbab09" : "#39d353");
+        // Color de la barra según carga
+        if (load > 92) bar.style.background = "#f85149"; // Crítico
+        else if (load > 75) bar.style.background = "#d29922"; // Alto
+        else bar.style.background = "#238636"; // Óptimo
 
-        // Canvas
+        // Dibujar Pixel Map
         const canvas = document.getElementById('mapCanvas');
         const ctx = canvas.getContext('2d');
         canvas.width = totalW;
@@ -121,25 +130,26 @@
 
         ctx.fillStyle = "#000";
         ctx.fillRect(0,0, totalW, totalH);
-        
+
         for(let i=0; i<cols; i++) {
             for(let j=0; j<rows; j++) {
-                ctx.strokeStyle = "#1f6feb";
+                ctx.strokeStyle = "#58a6ff";
                 ctx.lineWidth = 1;
                 ctx.strokeRect(i*pw, j*ph, pw, ph);
                 
-                ctx.fillStyle = "rgba(255,255,255,0.1)";
-                ctx.font = `${pw/5}px Arial`;
+                // Marcado de paneles para plano de montaje
+                ctx.fillStyle = "rgba(88, 166, 255, 0.2)";
+                ctx.font = `bold ${pw/5}px Inter, Arial`;
                 ctx.textAlign = "center";
-                ctx.fillText(`${i+1}-${j+1}`, (i*pw)+(pw/2), (j*ph)+(ph/2));
+                ctx.fillText(`C${i+1}-F${j+1}`, (i*pw)+(pw/2), (j*ph)+(ph/2));
             }
         }
     }
 
-    function exportPNG() {
+    function exportIMG() {
         const c = document.getElementById('mapCanvas');
         const link = document.createElement('a');
-        link.download = `Novastar_Map_${c.width}x${c.height}.png`;
+        link.download = `Novastar_Layout_${c.width}x${c.height}.png`;
         link.href = c.toDataURL();
         link.click();
     }
@@ -151,7 +161,8 @@
         document.getElementById('themeBtn').innerText = isDark ? "Modo Oscuro" : "Modo Claro";
     }
 
-    window.onload = calculate;
+    // Inicializar al cargar
+    window.onload = run;
 </script>
 
 </body>
