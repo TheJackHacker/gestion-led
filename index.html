@@ -3,152 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NovaStar Pro - Pixel Map Generator</title>
+    <title>NovaStar COEX - Professional Calculator</title>
     <style>
         :root {
-            --bg-body: #121212; --bg-container: #1e1e1e; --text-main: #e8eaed;
-            --primary: #0052cc; --accent: #ff8a80; --border: #3c4043;
+            --bg-body: #0f111a; --bg-container: #1a1d2b; --text-main: #e0e6ed;
+            --primary: #0052cc; --accent: #00f2ff; --border: #2d324a; --input-bg: #24293d;
         }
         [data-theme="light"] {
-            --bg-body: #f0f2f5; --bg-container: #ffffff; --text-main: #1a1a1b;
-            --primary: #0052cc; --border: #dadce0;
+            --bg-body: #f4f7f9; --bg-container: #ffffff; --text-main: #1e293b;
+            --primary: #0052cc; --border: #e2e8f0; --input-bg: #f8fafc;
         }
 
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-body); color: var(--text-main); margin: 0; padding: 20px; transition: 0.3s; }
-        .container { max-width: 1100px; margin: auto; background: var(--bg-container); padding: 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg-body); color: var(--text-main); margin: 0; padding: 20px; transition: 0.3s; }
+        .container { max-width: 1100px; margin: auto; background: var(--bg-container); padding: 30px; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); border: 1px solid var(--border); }
         
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; }
-        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .logo { font-weight: 800; font-size: 1.6em; color: var(--primary); letter-spacing: -1px; }
         
-        label { font-size: 0.8em; font-weight: bold; display: block; margin-bottom: 5px; color: var(--primary); }
-        input, select { width: 100%; padding: 10px; background: var(--bg-body); border: 1px solid var(--border); color: var(--text-main); border-radius: 5px; box-sizing: border-box; }
-        
-        .map-container { 
-            background: #000; padding: 20px; border-radius: 8px; overflow: auto; 
-            display: flex; flex-direction: column; align-items: center; border: 2px solid var(--primary);
-        }
-        canvas { max-width: 100%; height: auto; background: #111; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-        
-        .controls { margin-top: 20px; display: flex; gap: 10px; justify-content: center; }
-        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .btn-export { background: var(--primary); color: white; }
-        .btn-export:hover { opacity: 0.8; }
-        
-        .stats { display: flex; justify-content: space-around; background: var(--bg-body); padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9em; }
-        .stat-item span { display: block; text-align: center; }
-        .stat-val { font-weight: bold; color: var(--accent); font-size: 1.2em; }
+        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        label { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 6px; display: block; color: var(--text-main); opacity: 0.8; }
+        input, select { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid var(--border); color: var(--text-main); border-radius: 8px; outline: none; transition: 0.2s; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(0,82,204,0.2); }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: rgba(0,82,204,0.05); border: 1px solid var(--border); padding: 20px; border-radius: 12px; text-align: center; }
+        .stat-label { font-size: 12px; color: var(--text-main); opacity: 0.6; display: block; margin-bottom: 5px; }
+        .stat-val { font-size: 1.5em; font-weight: 800; color: var(--accent); }
+
+        .load-indicator { margin-top: 10px; background: #333; height: 8px; border-radius: 4px; overflow: hidden; }
+        .load-bar { height: 100%; background: var(--primary); transition: 0.5s; }
+
+        .map-area { background: #000; padding: 20px; border-radius: 12px; text-align: center; overflow: auto; min-height: 200px; border: 1px solid var(--border); }
+        canvas { max-width: 100%; height: auto; border: 1px solid #333; }
+
+        .footer-btns { margin-top: 20px; display: flex; gap: 10px; justify-content: center; }
+        .btn { padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <div style="font-weight: 900; font-size: 1.5em;">NOVA<span style="color:var(--primary)">STAR</span> <small style="font-weight:100; font-size: 0.6em;">PIXEL MAPPER</small></div>
-        <button class="btn" onclick="toggleTheme()" id="themeBtn">Modo Claro</button>
+        <div class="logo">NOVA<span style="color:var(--text-main)">STAR</span></div>
+        <button class="btn btn-outline" onclick="toggleTheme()" id="themeBtn">Modo Claro</button>
     </div>
 
     <div class="grid-inputs">
-        <div><label>Ancho Panel (px)</label><input type="number" id="pw" value="128" oninput="drawMap()"></div>
-        <div><label>Alto Panel (px)</label><input type="number" id="ph" value="128" oninput="drawMap()"></div>
-        <div><label>Ancho Pantalla (m)</label><input type="number" id="tw" value="4" step="0.5" oninput="drawMap()"></div>
-        <div><label>Alto Pantalla (m)</label><input type="number" id="th" value="2.5" step="0.5" oninput="drawMap()"></div>
-        <div><label>Panel mm (H)</label><input type="number" id="pmH" value="500" oninput="drawMap()"></div>
-        <div><label>Panel mm (V)</label><input type="number" id="pmV" value="500" oninput="drawMap()"></div>
-    </div>
-
-    <div class="stats">
-        <div class="stat-item"><span>Resolución Total</span><span class="stat-val" id="totalRes">0 x 0</span></div>
-        <div class="stat-item"><span>Matriz Paneles</span><span class="stat-val" id="matrix">0 x 0</span></div>
-        <div class="stat-item"><span>Total Paneles</span><span class="stat-val" id="totalPanels">0</span></div>
-    </div>
-
-    <div class="map-container">
-        <canvas id="pixelCanvas"></canvas>
-        <div class="controls">
-            <button class="btn btn-export" onclick="exportImage()">Descargar Pixel Map (.PNG)</button>
+        <div><label>Panel Píxeles H</label><input type="number" id="pw" value="192" oninput="draw()"></div>
+        <div><label>Panel Píxeles V</label><input type="number" id="ph" value="192" oninput="draw()"></div>
+        <div><label>Panel Ancho (mm)</label><input type="number" id="pmH" value="500" oninput="draw()"></div>
+        <div><label>Panel Alto (mm)</label><input type="number" id="pmV" value="500" oninput="draw()"></div>
+        <div><label>Ancho Total (m)</label><input type="number" id="tw" value="4.0" step="0.1" oninput="draw()"></div>
+        <div><label>Alto Total (m)</label><input type="number" id="th" value="2.5" step="0.1" oninput="draw()"></div>
+        <div><label>Frecuencia (Hz)</label>
+            <select id="hz" onchange="draw()">
+                <option value="50">50 Hz</option>
+                <option value="60" selected>60 Hz</option>
+            </select>
         </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-label">Resolución Total</span>
+            <span class="stat-val" id="res">0 x 0</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Píxeles Totales</span>
+            <span class="stat-val" id="totalPx">0</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Puertos Necesarios</span>
+            <span class="stat-val" id="ports" style="color:var(--primary)">0</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Carga Media por Puerto</span>
+            <span class="stat-val" id="loadText">0%</span>
+            <div class="load-indicator"><div class="load-bar" id="loadBar" style="width: 0%"></div></div>
+        </div>
+    </div>
+
+    <div class="map-area">
+        <canvas id="mapCanvas"></canvas>
+    </div>
+
+    <div class="footer-btns">
+        <button class="btn btn-primary" onclick="download()">Descargar Pixel Map PNG</button>
     </div>
 </div>
 
 <script>
-    function drawMap() {
-        const canvas = document.getElementById('pixelCanvas');
+    function draw() {
+        const canvas = document.getElementById('mapCanvas');
         const ctx = canvas.getContext('2d');
         
-        // Entradas
-        const pw = parseInt(document.getElementById('pw').value) || 0;
-        const ph = parseInt(document.getElementById('ph').value) || 0;
+        // Inputs
+        const pw = parseInt(document.getElementById('pw').value) || 1;
+        const ph = parseInt(document.getElementById('ph').value) || 1;
         const pmH = parseInt(document.getElementById('pmH').value) || 1;
         const pmV = parseInt(document.getElementById('pmV').value) || 1;
-        let tw = parseFloat(document.getElementById('tw').value) || 0;
-        let th = parseFloat(document.getElementById('th').value) || 0;
+        const tw = parseFloat(document.getElementById('tw').value) || 0;
+        const th = parseFloat(document.getElementById('th').value) || 0;
+        const hz = parseInt(document.getElementById('hz').value);
 
-        // Forzar incrementos de 0.5m
-        tw = Math.round(tw * 2) / 2;
-        th = Math.round(th * 2) / 2;
-
+        // Calcular cuántos paneles caben físicamente
         const cols = Math.floor((tw * 1000) / pmH);
         const rows = Math.floor((th * 1000) / pmV);
         
         const totalW = cols * pw;
         const totalH = rows * ph;
+        const totalPixels = totalW * totalH;
 
-        // Actualizar Stats
-        document.getElementById('totalRes').innerText = `${totalW} x ${totalH}`;
-        document.getElementById('matrix').innerText = `${cols} x ${rows}`;
-        document.getElementById('totalPanels').innerText = cols * rows;
+        // Capacidad NovaStar 1G (8-bit)
+        const capacity = (hz === 60) ? 655360 : 786432;
+        const portsNeeded = Math.ceil(totalPixels / capacity);
+        const loadPercent = totalPixels > 0 ? (totalPixels / (portsNeeded * capacity)) * 100 : 0;
 
-        // Ajustar tamaño del canvas al pixel real de la pantalla LED
-        canvas.width = totalW;
-        canvas.height = totalH;
+        // UI Updates
+        document.getElementById('res').innerText = `${totalW} x ${totalH}`;
+        document.getElementById('totalPx').innerText = totalPixels.toLocaleString();
+        document.getElementById('ports').innerText = totalPixels > 0 ? portsNeeded : 0;
+        document.getElementById('loadText').innerText = loadPercent.toFixed(1) + "%";
+        document.getElementById('loadBar').style.width = loadPercent + "%";
+        document.getElementById('loadBar').style.background = loadPercent > 90 ? "#ff4d4d" : (loadPercent > 70 ? "#ffcc00" : "#0052cc");
 
-        // Dibujar Paneles
-        ctx.fillStyle = "#111";
-        ctx.fillRect(0, 0, totalW, totalH);
+        // Canvas Setup
+        canvas.width = totalW || 100;
+        canvas.height = totalH || 100;
+        ctx.fillStyle = "#000";
+        ctx.fillRect(0,0, canvas.width, canvas.height);
 
-        for (let i = 0; i < cols; i++) {
-            for (let j = 0; j < rows; j++) {
-                // Color alternado para distinguir paneles (estilo NovaStar VMP)
-                ctx.strokeStyle = "#0052cc";
-                ctx.lineWidth = 1;
-                ctx.strokeRect(i * pw, j * ph, pw, ph);
-                
-                // Añadir texto de coordenadas en el centro de cada panel
-                ctx.fillStyle = "#333";
-                ctx.font = `${pw/6}px Arial`;
-                ctx.textAlign = "center";
-                ctx.fillText(`P${i+1},${j+1}`, (i * pw) + pw/2, (j * ph) + ph/2);
+        if(cols > 0 && rows > 0) {
+            for(let i=0; i<cols; i++) {
+                for(let j=0; j<rows; j++) {
+                    ctx.strokeStyle = "#0052cc";
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(i*pw, j*ph, pw, ph);
+                    
+                    // Texto dentro de cada panel
+                    ctx.fillStyle = "rgba(255,255,255,0.15)";
+                    ctx.font = `${pw/6}px Inter`;
+                    ctx.textAlign = "center";
+                    ctx.fillText(`${i+1},${j+1}`, (i*pw)+(pw/2), (j*ph)+(ph/2));
+                }
             }
         }
-        
-        // Borde exterior fuerte
-        ctx.strokeStyle = "#0052cc";
-        ctx.lineWidth = 4;
-        ctx.strokeRect(0, 0, totalW, totalH);
     }
 
-    function exportImage() {
-        const canvas = document.getElementById('pixelCanvas');
+    function download() {
+        const c = document.getElementById('mapCanvas');
         const link = document.createElement('a');
-        link.download = `pixelmap_novastar_${canvas.width}x${canvas.height}.png`;
-        link.href = canvas.toDataURL();
+        link.download = `NovaStar_PixelMap_${c.width}x${c.height}.png`;
+        link.href = c.toDataURL();
         link.click();
     }
 
     function toggleTheme() {
-        const doc = document.documentElement;
-        const btn = document.getElementById('themeBtn');
-        if (doc.getAttribute('data-theme') === 'dark') {
-            doc.setAttribute('data-theme', 'light');
-            btn.innerText = "Modo Oscuro";
-        } else {
-            doc.setAttribute('data-theme', 'dark');
-            btn.innerText = "Modo Claro";
-        }
+        const d = document.documentElement;
+        const isDark = d.getAttribute('data-theme') === 'dark';
+        d.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        document.getElementById('themeBtn').innerText = isDark ? "Modo Oscuro" : "Modo Claro";
     }
 
-    // Inicializar
-    window.onload = drawMap;
+    window.onload = draw;
 </script>
 
 </body>
