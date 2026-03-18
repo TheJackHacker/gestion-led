@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NOVASTAR - High Contrast Pixel Mapper</title>
+    <title>NOVASTAR - Precision Pixel Mapper</title>
     <style>
         :root {
             --bg-body: #0a0c12; --bg-container: #12161f; --text-main: #c9d1d9;
             --primary: #1e2330; --accent: #388bfd; --border: #30363d; --input-bg: #0a0c12;
-            --led-border: #388bfd; /* Color llamativo exterior (Azul NovaStar) */
+            --led-border: #388bfd; 
         }
         [data-theme="light"] {
             --bg-body: #f0f4f8; --bg-container: #ffffff; --text-main: #1f2937;
             --primary: #e2e8f0; --border: #cbd5e1; --input-bg: #ffffff;
-            --led-border: #1d4ed8; /* Color llamativo exterior en modo claro */
+            --led-border: #1d4ed8;
         }
 
-        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg-body); color: var(--text-main); margin: 0; padding: 15px; transition: 0.3s; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg-body); color: var(--text-main); margin: 0; padding: 15px; transition: 0.3s; }
         .container { max-width: 1200px; margin: auto; background: var(--bg-container); padding: 25px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
         
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
@@ -35,7 +35,7 @@
         .progress-fill { height: 100%; background: #388bfd; width: 0%; transition: 0.5s; }
 
         .canvas-area { 
-            background: #000; /* Fondo negro puro para máximo contraste del canvas */
+            background: #000; 
             padding: 15px; 
             border-radius: 8px; 
             border: 1px solid var(--border); 
@@ -43,28 +43,26 @@
             justify-content: center; 
             align-items: center;
             overflow: hidden;
-            min-height: 200px;
         }
 
         canvas { 
             max-width: 100%; 
             height: auto !important; 
             display: block;
-            image-rendering: pixelated; /* Mantiene bordes súper nítidos */
-            border: 4px solid var(--led-border); /* Borde llamativo exterior */
-            box-shadow: 0 0 30px rgba(56, 139, 253, 0.3); /* Resplandor sutil */
+            image-rendering: pixelated; 
+            background-color: #000;
         }
 
         .btn { padding: 12px; width: 100%; background: var(--accent); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 15px; transition: 0.2s; font-size: 14px; }
         .btn:hover { background: #4592ef; transform: translateY(-1px); }
-        .btn-theme { background: transparent; color: var(--text-main); border: 1px solid var(--border); width: auto; font-size: 0.75em; padding: 5px 10px; margin-top: 0; }
+        .btn-theme { background: transparent; color: var(--text-main); border: 1px solid var(--border); width: auto; font-size: 0.75em; padding: 5px 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <div class="logo">NOVA<span style="color:var(--text-main)">STAR</span> <span style="font-weight: 300; font-size: 0.8em;">HI-CONTRAST MAPPER</span></div>
+        <div class="logo">NOVA<span style="color:var(--text-main)">STAR</span> <span style="font-weight: 300; font-size: 0.8em;">PRECISION MAPPER</span></div>
         <button class="btn btn-theme" onclick="toggleTheme()" id="themeBtn">Modo Claro</button>
     </div>
 
@@ -84,9 +82,9 @@
     <div class="stats-row">
         <div class="stat-card"><span class="stat-label">Resolución Nativa</span><span class="stat-val" id="res">0 x 0</span></div>
         <div class="stat-card"><span class="stat-label">Píxeles Totales</span><span class="stat-val" id="totalPx">0</span></div>
-        <div class="stat-card"><span class="stat-label">Puertos 1G Requeridos</span><span class="stat-val" id="ports">0</span></div>
+        <div class="stat-card"><span class="stat-label">Puertos 1G Necesarios</span><span class="stat-val" id="ports">0</span></div>
         <div class="stat-card">
-            <span class="stat-label">Carga del Sistema</span>
+            <span class="stat-label">Carga del Puerto (%)</span>
             <span class="stat-val" id="loadTxt">0%</span>
             <div class="progress-bg"><div class="progress-fill" id="loadBar"></div></div>
         </div>
@@ -96,7 +94,7 @@
         <canvas id="mapCanvas"></canvas>
     </div>
 
-    <button class="btn" onclick="exportIMG()">Descargar Pixel Map Técnico (PNG)</button>
+    <button class="btn" onclick="exportIMG()">Exportar Pixel Map Técnico (PNG)</button>
 </div>
 
 <script>
@@ -129,61 +127,49 @@
         canvas.width = totalW;
         canvas.height = totalH;
 
-        // Fondo del Canvas (Negro puro para máximo contraste)
+        // Fondo 
         ctx.fillStyle = "#000000";
         ctx.fillRect(0,0, totalW, totalH);
 
         for(let i=0; i<cols; i++) {
             for(let j=0; j<rows; j++) {
-                // Patrón damero de alto contraste (Negro y Gris Oscuro Técnico)
                 const isEven = (i + j) % 2 === 0;
                 ctx.fillStyle = isEven ? "#1a1e26" : "#000000";
                 
                 const x = i * pw;
                 const y = j * ph;
-
                 ctx.fillRect(x, y, pw, ph);
                 
-                // Borde interior extremadamente sutil (opcional)
-                ctx.strokeStyle = "rgba(255,255,255,0.03)";
-                ctx.lineWidth = 1;
-                ctx.strokeRect(x + 1, y + 1, pw - 2, ph - 2);
-
-                // Coordenadas en la parte inferior (Alto contraste blanco)
-                const padding = ph * 0.08; // Padding proporcional
-                const fontSize = Math.max(14, ph / 10); // Fuente más grande para legibilidad técnica
+                // Coordenadas blancas alta visibilidad
+                const padding = ph * 0.08;
+                const fontSize = Math.max(14, ph / 10);
                 ctx.fillStyle = "#ffffff";
-                ctx.font = `800 ${fontSize}px 'Inter', system-ui, sans-serif`;
+                ctx.font = `800 ${fontSize}px sans-serif`;
                 ctx.textAlign = "center";
                 ctx.textBaseline = "bottom";
+                ctx.fillText(`C${i+1}:F${j+1}`, x + (pw/2), y + ph - padding);
                 
-                // Texto: C-F (Columna-Fila)
-                ctx.fillText(`C${i+1} : F${j+1}`, x + (pw/2), y + ph - padding);
-                
-                // Cruz de centro sutil (ayuda al alineamiento de contenido)
-                ctx.strokeStyle = isEven ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.04)";
+                // Centro sutil
+                ctx.strokeStyle = "rgba(255,255,255,0.05)";
                 ctx.lineWidth = 0.5;
                 ctx.beginPath();
-                ctx.moveTo(x + pw/2 - 10, y + ph/2);
-                ctx.lineTo(x + pw/2 + 10, y + ph/2);
-                ctx.moveTo(x + pw/2, y + ph/2 - 10);
-                ctx.lineTo(x + pw/2, y + ph/2 + 10);
+                ctx.moveTo(x + pw/2 - 5, y + ph/2); ctx.lineTo(x + pw/2 + 5, y + ph/2);
+                ctx.moveTo(x + pw/2, y + ph/2 - 5); ctx.lineTo(x + pw/2, y + ph/2 + 5);
                 ctx.stroke();
             }
         }
         
-        // Marco exterior maestro llamativo (Azul NovaStar)
-        // Se dibuja *dentro* del canvas para que se exporte
+        // --- BORDE EXTERIOR DE PRECISION (2 PX) ---
         ctx.strokeStyle = "#388bfd"; 
-        ctx.lineWidth = 8; // Borde grueso técnico
-        ctx.strokeRect(4, 4, totalW - 8, totalH - 8); // Ajuste para que el borde esté centrado
+        ctx.lineWidth = 2;
+        // Dibujamos el borde exactamente en el límite exterior
+        ctx.strokeRect(1, 1, totalW - 2, totalH - 2); 
     }
 
     function exportIMG() {
         const c = document.getElementById('mapCanvas');
         const link = document.createElement('a');
-        const date = new Date().toISOString().slice(0,10);
-        link.download = `NovaStar_HiContrastMap_${c.width}x${c.height}_${date}.png`;
+        link.download = `Precision_PixelMap_${c.width}x${c.height}.png`;
         link.href = c.toDataURL("image/png");
         link.click();
     }
@@ -193,7 +179,7 @@
         const isDark = d.getAttribute('data-theme') === 'dark';
         d.setAttribute('data-theme', isDark ? 'light' : 'dark');
         document.getElementById('themeBtn').innerText = isDark ? "Modo Oscuro" : "Modo Claro";
-        run(); // Forzar redibujado para actualizar colores del borde si es necesario
+        run();
     }
 
     window.onload = run;
