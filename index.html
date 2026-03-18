@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora NovaStar COEX - Pro Tool</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 5px solid #0052cc; }
+        h1 { color: #0052cc; text-align: center; margin-bottom: 5px; }
+        p.subtitle { text-align: center; color: #666; margin-bottom: 30px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        .results { margin-top: 30px; padding: 20px; background: #eef2f7; border-radius: 8px; }
+        .results h2 { margin-top: 0; font-size: 1.2em; color: #0052cc; }
+        .res-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #dce3eb; }
+        .res-item:last-child { border-bottom: none; }
+        .value { font-weight: bold; color: #d32f2f; }
+        .warning { font-size: 0.8em; color: #666; font-style: italic; margin-top: 15px; }
+        .header-logo { text-align: center; margin-bottom: 10px; font-weight: 900; font-size: 1.5em; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-logo">NOVA<span style="color:#0052cc">STAR</span> COEX</div>
+    <h1>Calculadora de Configuración</h1>
+    <p class="subtitle">Herramienta de Ingeniería para Pantallas LED</p>
+
+    <div class="grid">
+        <div class="input-group">
+            <label>Píxeles Horizontales (H)</label>
+            <input type="number" id="pixH" value="1920" oninput="calcular()">
+        </div>
+        <div class="input-group">
+            <label>Píxeles Verticales (V)</label>
+            <input type="number" id="pixV" value="1080" oninput="calcular()">
+        </div>
+        <div class="input-group">
+            <label>Pixel Pitch (mm)</label>
+            <input type="number" id="pitch" value="2.6" step="0.1" oninput="calcular()">
+        </div>
+        <div class="input-group">
+            <label>Frecuencia de Refresco (Hz)</label>
+            <select id="refresh" onchange="calcular()">
+                <option value="30">30 Hz</option>
+                <option value="60" selected>60 Hz</option>
+                <option value="120">120 Hz</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="results">
+        <h2>Especificaciones Técnicas</h2>
+        <div class="res-item">
+            <span>Resolución Total:</span>
+            <span class="value" id="totalPix">0 px</span>
+        </div>
+        <div class="res-item">
+            <span>Ancho de Pantalla:</span>
+            <span class="value" id="dimH">0 mm</span>
+        </div>
+        <div class="res-item">
+            <span>Alto de Pantalla:</span>
+            <span class="value" id="dimV">0 mm</span>
+        </div>
+        <div class="res-item">
+            <span>Superficie Total:</span>
+            <span class="value" id="area">0 m²</span>
+        </div>
+        <div class="res-item">
+            <span>Puertos 1G Requeridos (Estándar):</span>
+            <span class="value" id="ports">0</span>
+        </div>
+        
+        <p class="warning">* El cálculo de puertos se basa en una capacidad de 655,360 píxeles por cable (8-bit). Para COEX y VMP, consulte el ancho de banda específico según el modo de baja latencia.</p>
+    </div>
+</div>
+
+<script>
+function calcular() {
+    // Obtener valores
+    const h = parseFloat(document.getElementById('pixH').value) || 0;
+    const v = parseFloat(document.getElementById('pixV').value) || 0;
+    const p = parseFloat(document.getElementById('pitch').value) || 0;
+    const hz = parseFloat(document.getElementById('refresh').value);
+
+    // Cálculos de píxeles
+    const total = h * v;
+    document.getElementById('totalPix').innerText = total.toLocaleString() + " px";
+
+    // Cálculos de dimensiones (mm a m)
+    const widthMm = h * p;
+    const heightMm = v * p;
+    const areaM2 = (widthMm * heightMm) / 1000000;
+
+    document.getElementById('dimH').innerText = widthMm.toLocaleString() + " mm (" + (widthMm/1000).toFixed(2) + " m)";
+    document.getElementById('dimV').innerText = heightMm.toLocaleString() + " mm (" + (heightMm/1000).toFixed(2) + " m)";
+    document.getElementById('area').innerText = areaM2.toFixed(2) + " m²";
+
+    // Capacidad de señal (Cálculo aproximado NovaStar)
+    // Capacidad base 60Hz = 655,360. Si subes a 120Hz, la capacidad se divide por 2.
+    let capacidadPorPuerto = 655360;
+    if (hz === 120) capacidadPorPuerto = 327680;
+    if (hz === 30) capacidadPorPuerto = 1310720;
+
+    const puertosNecesarios = Math.ceil(total / capacidadPorPuerto);
+    document.getElementById('ports').innerText = total > 0 ? puertosNecesarios : 0;
+}
+
+// Ejecutar al cargar
+calcular();
+</script>
+
+</body>
+</html>
