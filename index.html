@@ -1,189 +1,221 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="dark">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NOVASTAR - Precision Pixel Mapper</title>
+    <title>Visualizador de Pixelmaps</title>
     <style>
-        :root {
-            --bg-body: #0a0c12; --bg-container: #12161f; --text-main: #c9d1d9;
-            --primary: #1e2330; --accent: #388bfd; --border: #30363d; --input-bg: #0a0c12;
-            --led-border: #388bfd; 
-        }
-        [data-theme="light"] {
-            --bg-body: #f0f4f8; --bg-container: #ffffff; --text-main: #1f2937;
-            --primary: #e2e8f0; --border: #cbd5e1; --input-bg: #ffffff;
-            --led-border: #1d4ed8;
-        }
-
-        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg-body); color: var(--text-main); margin: 0; padding: 15px; transition: 0.3s; }
-        .container { max-width: 1200px; margin: auto; background: var(--bg-container); padding: 25px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
-        
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-        .logo { font-weight: 800; font-size: 1.2em; color: var(--accent); letter-spacing: 1px; }
-        
-        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 20px; }
-        label { font-size: 9px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; display: block; color: var(--text-main); opacity: 0.7; }
-        input, select { width: 100%; padding: 8px; background: var(--input-bg); border: 1px solid var(--border); color: var(--text-main); border-radius: 6px; outline: none; font-size: 13px; }
-
-        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-bottom: 20px; }
-        .stat-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); padding: 10px; border-radius: 8px; text-align: center; }
-        .stat-label { font-size: 8px; opacity: 0.5; display: block; margin-bottom: 3px; text-transform: uppercase; }
-        .stat-val { font-size: 1.1em; font-weight: 700; color: var(--accent); }
-
-        .progress-bg { background: #1e2330; height: 5px; border-radius: 2.5px; overflow: hidden; margin-top: 5px; }
-        .progress-fill { height: 100%; background: #388bfd; width: 0%; transition: 0.5s; }
-
-        .canvas-area { 
-            background: #000; 
-            padding: 15px; 
-            border-radius: 8px; 
-            border: 1px solid var(--border); 
-            display: flex; 
-            justify-content: center; 
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            overflow: hidden;
         }
-
-        canvas { 
-            max-width: 100%; 
-            height: auto !important; 
-            display: block;
-            image-rendering: pixelated; 
+        .controls {
+            background: #2d2d2d;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        input, select, button {
+            padding: 8px;
+            background: #444;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+        }
+        button {
+            cursor: pointer;
+            background: #007bff;
+            border: none;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .canvas-container {
+            border: 2px dashed #555;
             background-color: #000;
+            overflow: auto; /* Por si el canvas es muy grande */
+            max-width: 95vw;
+            max-height: 75vh;
         }
-
-        .btn { padding: 12px; width: 100%; background: var(--accent); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 15px; transition: 0.2s; font-size: 14px; }
-        .btn:hover { background: #4592ef; transform: translateY(-1px); }
-        .btn-theme { background: transparent; color: var(--text-main); border: 1px solid var(--border); width: auto; font-size: 0.75em; padding: 5px 10px; }
+        canvas {
+            display: block;
+            cursor: grab;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <div class="logo">NOVA<span style="color:var(--text-main)">STAR</span> <span style="font-weight: 300; font-size: 0.8em;">PRECISION MAPPER</span></div>
-        <button class="btn btn-theme" onclick="toggleTheme()" id="themeBtn">Modo Claro</button>
-    </div>
-
-    <div class="grid-inputs">
-        <div><label>Píxeles Panel (H)</label><input type="number" id="pw" value="192" oninput="run()"></div>
-        <div><label>Píxeles Panel (V)</label><input type="number" id="ph" value="192" oninput="run()"></div>
-        <div><label>Nº Columnas</label><input type="number" id="cols" value="10" oninput="run()"></div>
-        <div><label>Nº Filas</label><input type="number" id="rows" value="6" oninput="run()"></div>
-        <div><label>Frecuencia</label>
-            <select id="hz" onchange="run()">
-                <option value="50">50 Hz</option>
-                <option value="60" selected>60 Hz</option>
+    <div class="controls">
+        <div>
+            <label for="resolutions">Resolución Base:</label>
+            <select id="resolutions">
+                <option value="1920,1080">Full HD (1920x1080)</option>
+                <option value="3840,2160">4K (3840x2160)</option>
+                <option value="custom">Custom</option>
             </select>
         </div>
-    </div>
-
-    <div class="stats-row">
-        <div class="stat-card"><span class="stat-label">Resolución Nativa</span><span class="stat-val" id="res">0 x 0</span></div>
-        <div class="stat-card"><span class="stat-label">Píxeles Totales</span><span class="stat-val" id="totalPx">0</span></div>
-        <div class="stat-card"><span class="stat-label">Puertos 1G Necesarios</span><span class="stat-val" id="ports">0</span></div>
-        <div class="stat-card">
-            <span class="stat-label">Carga del Puerto (%)</span>
-            <span class="stat-val" id="loadTxt">0%</span>
-            <div class="progress-bg"><div class="progress-fill" id="loadBar"></div></div>
+        <div id="custom-res" style="display: none;">
+            <input type="number" id="custom-w" placeholder="Ancho (px)" value="1000">
+            x
+            <input type="number" id="custom-h" placeholder="Alto (px)" value="1000">
+            <button id="apply-custom">Aplicar</button>
+        </div>
+        <div>
+            <label for="image-upload">Importar Pixelmaps (PNG):</label>
+            <input type="file" id="image-upload" accept="image/png" multiple>
         </div>
     </div>
 
-    <div class="canvas-area">
-        <canvas id="mapCanvas"></canvas>
+    <div class="canvas-container">
+        <canvas id="mappingCanvas" width="1920" height="1080"></canvas>
     </div>
 
-    <button class="btn" onclick="exportIMG()">Exportar Pixel Map Técnico (PNG)</button>
-</div>
-
-<script>
-    function run() {
-        const pw = parseInt(document.getElementById('pw').value) || 1;
-        const ph = parseInt(document.getElementById('ph').value) || 1;
-        const cols = parseInt(document.getElementById('cols').value) || 1;
-        const rows = parseInt(document.getElementById('rows').value) || 1;
-        const hz = parseInt(document.getElementById('hz').value);
-
-        const totalW = cols * pw;
-        const totalH = rows * ph;
-        const totalPixels = totalW * totalH;
-
-        const capacity = (hz === 60) ? 655360 : 786432;
-        const ports = Math.ceil(totalPixels / capacity);
-        const load = totalPixels > 0 ? (totalPixels / (ports * capacity)) * 100 : 0;
-
-        document.getElementById('res').innerText = `${totalW} x ${totalH}`;
-        document.getElementById('totalPx').innerText = totalPixels.toLocaleString();
-        document.getElementById('ports').innerText = totalPixels > 0 ? ports : 0;
-        document.getElementById('loadTxt').innerText = load.toFixed(1) + "%";
-        
-        const bar = document.getElementById('loadBar');
-        bar.style.width = load + "%";
-        bar.style.background = load > 92 ? "#f85149" : (load > 75 ? "#d29922" : "#388bfd");
-
-        const canvas = document.getElementById('mapCanvas');
+    <script>
+        const canvas = document.getElementById('mappingCanvas');
         const ctx = canvas.getContext('2d');
-        canvas.width = totalW;
-        canvas.height = totalH;
+        const uploadInput = document.getElementById('image-upload');
+        const resSelect = document.getElementById('resolutions');
+        const customResDiv = document.getElementById('custom-res');
+        const applyCustomBtn = document.getElementById('apply-custom');
 
-        // Fondo 
-        ctx.fillStyle = "#000000";
-        ctx.fillRect(0,0, totalW, totalH);
+        let pixelmaps = []; // Almacena las imágenes y sus coordenadas
+        let isDragging = false;
+        let dragIndex = -1;
+        let startX, startY;
 
-        for(let i=0; i<cols; i++) {
-            for(let j=0; j<rows; j++) {
-                const isEven = (i + j) % 2 === 0;
-                ctx.fillStyle = isEven ? "#1a1e26" : "#000000";
-                
-                const x = i * pw;
-                const y = j * ph;
-                ctx.fillRect(x, y, pw, ph);
-                
-                // Coordenadas blancas alta visibilidad
-                const padding = ph * 0.08;
-                const fontSize = Math.max(14, ph / 10);
-                ctx.fillStyle = "#ffffff";
-                ctx.font = `800 ${fontSize}px sans-serif`;
-                ctx.textAlign = "center";
-                ctx.textBaseline = "bottom";
-                ctx.fillText(`C${i+1}:F${j+1}`, x + (pw/2), y + ph - padding);
-                
-                // Centro sutil
-                ctx.strokeStyle = "rgba(255,255,255,0.05)";
-                ctx.lineWidth = 0.5;
-                ctx.beginPath();
-                ctx.moveTo(x + pw/2 - 5, y + ph/2); ctx.lineTo(x + pw/2 + 5, y + ph/2);
-                ctx.moveTo(x + pw/2, y + ph/2 - 5); ctx.lineTo(x + pw/2, y + ph/2 + 5);
-                ctx.stroke();
+        // Cambiar resolución del Canvas
+        resSelect.addEventListener('change', (e) => {
+            if (e.target.value === 'custom') {
+                customResDiv.style.display = 'block';
+            } else {
+                customResDiv.style.display = 'none';
+                const [w, h] = e.target.value.split(',');
+                resizeCanvas(parseInt(w), parseInt(h));
             }
+        });
+
+        applyCustomBtn.addEventListener('click', () => {
+            const w = document.getElementById('custom-w').value;
+            const h = document.getElementById('custom-h').value;
+            resizeCanvas(w, h);
+        });
+
+        function resizeCanvas(width, height) {
+            canvas.width = width;
+            canvas.height = height;
+            draw(); // Redibujar todo al cambiar el tamaño
         }
-        
-        // --- BORDE EXTERIOR DE PRECISION (2 PX) ---
-        ctx.strokeStyle = "#388bfd"; 
-        ctx.lineWidth = 2;
-        // Dibujamos el borde exactamente en el límite exterior
-        ctx.strokeRect(1, 1, totalW - 2, totalH - 2); 
-    }
 
-    function exportIMG() {
-        const c = document.getElementById('mapCanvas');
-        const link = document.createElement('a');
-        link.download = `Precision_PixelMap_${c.width}x${c.height}.png`;
-        link.href = c.toDataURL("image/png");
-        link.click();
-    }
+        // Cargar múltiples PNGs
+        uploadInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            
+            files.forEach(file => {
+                if (file.type !== 'image/png') return;
 
-    function toggleTheme() {
-        const d = document.documentElement;
-        const isDark = d.getAttribute('data-theme') === 'dark';
-        d.setAttribute('data-theme', isDark ? 'light' : 'dark');
-        document.getElementById('themeBtn').innerText = isDark ? "Modo Oscuro" : "Modo Claro";
-        run();
-    }
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        // Colocar la imagen en una posición inicial en cascada
+                        const offset = pixelmaps.length * 20; 
+                        pixelmaps.push({
+                            img: img,
+                            x: 50 + offset,
+                            y: 50 + offset,
+                            width: img.width,
+                            height: img.height
+                        });
+                        draw();
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        });
 
-    window.onload = run;
-</script>
+        // Función principal de renderizado
+        function draw() {
+            // Limpiar canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Dibujar rejilla de fondo opcional (para referencia)
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 1;
+            for (let x = 0; x <= canvas.width; x += 100) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+            }
+            for (let y = 0; y <= canvas.height; y += 100) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+            }
 
+            // Dibujar todos los pixelmaps
+            pixelmaps.forEach((map) => {
+                ctx.drawImage(map.img, map.x, map.y, map.width, map.height);
+            });
+        }
+
+        // Lógica de Mouse: Arrastrar y soltar
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            // Calcular posición del mouse respecto al canvas considerando scroll/escalado
+            const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+            // Buscar si hicimos clic en alguna imagen (de arriba hacia abajo visualmente)
+            for (let i = pixelmaps.length - 1; i >= 0; i--) {
+                let map = pixelmaps[i];
+                if (mouseX >= map.x && mouseX <= map.x + map.width &&
+                    mouseY >= map.y && mouseY <= map.y + map.height) {
+                    
+                    isDragging = true;
+                    dragIndex = i;
+                    // Guardar el desfase entre el clic y la esquina superior izquierda de la imagen
+                    startX = mouseX - map.x;
+                    startY = mouseY - map.y;
+                    
+                    // Traer la imagen seleccionada al frente del array (renderizar encima)
+                    const selectedMap = pixelmaps.splice(i, 1)[0];
+                    pixelmaps.push(selectedMap);
+                    dragIndex = pixelmaps.length - 1;
+                    
+                    break;
+                }
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+            // Actualizar coordenadas basándose en el punto de anclaje (startX, startY)
+            pixelmaps[dragIndex].x = mouseX - startX;
+            pixelmaps[dragIndex].y = mouseY - startY;
+
+            draw(); // Renderizar movimiento en tiempo real
+        });
+
+        canvas.addEventListener('mouseup', () => { isDragging = false; dragIndex = -1; });
+        canvas.addEventListener('mouseout', () => { isDragging = false; dragIndex = -1; });
+
+        // Dibujo inicial
+        draw();
+    </script>
 </body>
 </html>
