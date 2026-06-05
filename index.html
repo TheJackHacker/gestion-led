@@ -171,12 +171,6 @@
             max-height: 80vh;
             object-fit: contain; 
             display: block;
-            background-image: linear-gradient(45deg, #111 25%, transparent 25%), 
-                              linear-gradient(-45deg, #111 25%, transparent 25%), 
-                              linear-gradient(45deg, transparent 75%, #111 75%), 
-                              linear-gradient(-45deg, transparent 75%, #111 75%);
-            background-size: 20px 20px;
-            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
         }
         .info-bar {
             position: absolute;
@@ -373,54 +367,51 @@
         }
 
         // Renderizar elementos en el Canvas
-        function render(isExporting = false) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        function render() {
+            // Fondo negro sólido para el canvas
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             loadedMaps.forEach(map => {
                 // 1. Dibujar el pixelmap original
                 ctx.drawImage(map.img, map.x, map.y, map.width, map.height);
                 
-                // 2. Capa técnica de coordenadas (Se omite al exportar)
-                if (!isExporting) {
-                    // Contorno perimetral
-                    ctx.strokeStyle = '#04d361';
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(map.x, map.y, map.width, map.height);
-                    
-                    // Texto formateado estilo: X:0, Y:0
-                    const labelText = `X:${map.x}, Y:${map.y}`;
-                    ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-                    const textWidth = ctx.measureText(labelText).width;
-                    
-                    // Caja con fondo sólido (más grande para acomodar los 16px)
-                    ctx.fillStyle = '#1a1a1e';
-                    ctx.fillRect(map.x, map.y, textWidth + 20, 32);
-                    
-                    // Renderizado final del texto de coordenadas
-                    ctx.fillStyle = '#04d361';
-                    ctx.fillText(labelText, map.x + 10, map.y + 22);
-                }
+                // 2. Capa técnica de coordenadas (ahora se renderiza siempre)
+                // Contorno perimetral
+                ctx.strokeStyle = '#04d361';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(map.x, map.y, map.width, map.height);
+                
+                // Texto formateado estilo: X:0, Y:0
+                const labelText = `X:${map.x}, Y:${map.y}`;
+                ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+                const textWidth = ctx.measureText(labelText).width;
+                
+                // Caja con fondo sólido
+                ctx.fillStyle = '#1a1a1e';
+                ctx.fillRect(map.x, map.y, textWidth + 20, 32);
+                
+                // Renderizado final del texto de coordenadas
+                ctx.fillStyle = '#04d361';
+                ctx.fillText(labelText, map.x + 10, map.y + 22);
             });
         }
 
-        // Exportar a imagen física limpia
+        // Exportar a imagen física con fondo negro y coordenadas
         btnExport.addEventListener('click', () => {
             if (loadedMaps.length === 0) {
                 alert('No hay pixelmaps en el lienzo para exportar.');
                 return;
             }
             
-            // 1. Renderizar de forma limpia
-            render(true);
+            // Refrescar el canvas por seguridad
+            render();
             
-            // 2. Ejecutar descarga
+            // Ejecutar descarga
             const link = document.createElement('a');
             link.download = `canvas_exportado_${canvas.width}x${canvas.height}.png`;
             link.href = canvas.toDataURL('image/png'); 
             link.click();
-            
-            // 3. Restaurar vista técnica
-            render(false);
         });
 
         // Inicio por defecto
