@@ -90,7 +90,7 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            max-height: 300px;
+            max-height: 380px;
             overflow-y: auto;
             padding-right: 4px;
         }
@@ -193,7 +193,7 @@
 <body>
 
     <div class="sidebar">
-        <h2>Fricción Zero Setup</h2>
+        <h2>PIXELMAP CANVAS CREATOR</h2>
         
         <div class="section">
             <span class="section-title">Lienzo Principal</span>
@@ -227,14 +227,6 @@
             </div>
         </div>
 
-        <div class="section">
-            <span class="section-title">Opciones Visuales</span>
-            <div class="control-group" style="display: flex; align-items: center; gap: 8px;">
-                <input type="checkbox" id="show-coords" checked style="width: auto; cursor: pointer;">
-                <label for="show-coords" style="margin-bottom: 0; cursor: pointer;">Ver coordenadas en lienzo</label>
-            </div>
-        </div>
-
         <div class="section" style="flex: 1; display: flex; flex-direction: column;">
             <span class="section-title">Archivos Cargados</span>
             <div class="layers-list" id="layers-list">
@@ -262,7 +254,6 @@
         const canvasHInput = document.getElementById('canvas-h');
         const imageUpload = document.getElementById('image-upload');
         const layersListContainer = document.getElementById('layers-list');
-        const showCoordsCheckbox = document.getElementById('show-coords');
         const btnExport = document.getElementById('btn-export');
         const infoBar = document.getElementById('info-bar');
 
@@ -292,7 +283,6 @@
         resolutionsSelect.addEventListener('change', updateCanvasSize);
         canvasWInput.addEventListener('input', updateCanvasSize);
         canvasHInput.addEventListener('input', updateCanvasSize);
-        showCoordsCheckbox.addEventListener('change', render);
 
         // Subir archivo individual
         imageUpload.addEventListener('change', (e) => {
@@ -382,50 +372,55 @@
             });
         }
 
-        // Renderizar elementos en el Canvas
-        function render() {
+        // Renderizar elementos en el Canvas (con parámetro opcional para limpiar en la exportación)
+        function render(isExporting = false) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
             loadedMaps.forEach(map => {
                 // 1. Dibujar el pixelmap original
                 ctx.drawImage(map.img, map.x, map.y, map.width, map.height);
                 
-                // 2. Capa técnica: Renderizar bordes e información de coordenadas
-                if (showCoordsCheckbox.checked) {
-                    // Contorno verde llamativo para identificar límites del bloque
+                // 2. Capa técnica de coordenadas (Se omite si estamos exportando el archivo definitivo)
+                if (!isExporting) {
+                    // Contorno perimetral
                     ctx.strokeStyle = '#04d361';
                     ctx.lineWidth = 2;
                     ctx.strokeRect(map.x, map.y, map.width, map.height);
                     
-                    // Cadena de texto con los datos de posición
-                    const labelText = `X: ${map.x} | Y: ${map.y}`;
-                    ctx.font = 'bold 12px monospace';
+                    // Texto formateado estilo: X0, Y0
+                    const labelText = `X${map.x}, Y${map.y}`;
+                    ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
                     const textWidth = ctx.measureText(labelText).width;
                     
-                    // Fondo oscuro para asegurar contraste independientemente de los colores de la imagen
-                    ctx.fillStyle = 'rgba(18, 18, 20, 0.85)';
-                    ctx.fillRect(map.x, map.y, textWidth + 14, 22);
+                    // Caja con fondo sólido (Color oscuro a juego con la interfaz, sin opacidad)
+                    ctx.fillStyle = '#1a1a1e';
+                    ctx.fillRect(map.x, map.y, textWidth + 16, 26);
                     
-                    // Dibujar el texto indicador
+                    // Renderizado final del texto de coordenadas
                     ctx.fillStyle = '#04d361';
-                    ctx.fillText(labelText, map.x + 7, map.y + 15);
+                    ctx.fillText(labelText, map.x + 8, map.y + 18);
                 }
             });
         }
 
-        // Exportar a imagen física
+        // Exportar a imagen física limpia
         btnExport.addEventListener('click', () => {
             if (loadedMaps.length === 0) {
                 alert('No hay pixelmaps en el lienzo para exportar.');
                 return;
             }
-            // Forzar renderizado para asegurar coherencia con el estado actual del checkbox
-            render();
             
+            // 1. Renderizar de forma limpia (oculta las guías y textos momentáneamente)
+            render(true);
+            
+            // 2. Ejecutar descarga del PNG nativo
             const link = document.createElement('a');
             link.download = `canvas_exportado_${canvas.width}x${canvas.height}.png`;
             link.href = canvas.toDataURL('image/png'); 
             link.click();
+            
+            // 3. Restaurar la vista técnica con coordenadas inmediatamente en pantalla
+            render(false);
         });
 
         // Inicio por defecto
