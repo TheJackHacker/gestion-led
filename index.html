@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador y Posicionador de Pixelmaps</title>
+    <title>PixelMap Canvas Creator</title>
     <style>
         * {
             box-sizing: border-box;
@@ -193,7 +193,7 @@
 <body>
 
     <div class="sidebar">
-        <h2>PIXELMAP CANVAS CREATOR</h2>
+        <h2>PixelMap Canvas Creator</h2>
         
         <div class="section">
             <span class="section-title">Lienzo Principal</span>
@@ -372,7 +372,7 @@
             });
         }
 
-        // Renderizar elementos en el Canvas (con parámetro opcional para limpiar en la exportación)
+        // Renderizar elementos en el Canvas
         function render(isExporting = false) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
@@ -380,25 +380,25 @@
                 // 1. Dibujar el pixelmap original
                 ctx.drawImage(map.img, map.x, map.y, map.width, map.height);
                 
-                // 2. Capa técnica de coordenadas (Se omite si estamos exportando el archivo definitivo)
+                // 2. Capa técnica de coordenadas (Se omite al exportar)
                 if (!isExporting) {
                     // Contorno perimetral
                     ctx.strokeStyle = '#04d361';
                     ctx.lineWidth = 2;
                     ctx.strokeRect(map.x, map.y, map.width, map.height);
                     
-                    // Texto formateado estilo: X0, Y0
-                    const labelText = `X${map.x}, Y${map.y}`;
-                    ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+                    // Texto formateado estilo: X:0, Y:0
+                    const labelText = `X:${map.x}, Y:${map.y}`;
+                    ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
                     const textWidth = ctx.measureText(labelText).width;
                     
-                    // Caja con fondo sólido (Color oscuro a juego con la interfaz, sin opacidad)
+                    // Caja con fondo sólido (más grande para acomodar los 16px)
                     ctx.fillStyle = '#1a1a1e';
-                    ctx.fillRect(map.x, map.y, textWidth + 16, 26);
+                    ctx.fillRect(map.x, map.y, textWidth + 20, 32);
                     
                     // Renderizado final del texto de coordenadas
                     ctx.fillStyle = '#04d361';
-                    ctx.fillText(labelText, map.x + 8, map.y + 18);
+                    ctx.fillText(labelText, map.x + 10, map.y + 22);
                 }
             });
         }
@@ -410,16 +410,16 @@
                 return;
             }
             
-            // 1. Renderizar de forma limpia (oculta las guías y textos momentáneamente)
+            // 1. Renderizar de forma limpia
             render(true);
             
-            // 2. Ejecutar descarga del PNG nativo
+            // 2. Ejecutar descarga
             const link = document.createElement('a');
             link.download = `canvas_exportado_${canvas.width}x${canvas.height}.png`;
             link.href = canvas.toDataURL('image/png'); 
             link.click();
             
-            // 3. Restaurar la vista técnica con coordenadas inmediatamente en pantalla
+            // 3. Restaurar vista técnica
             render(false);
         });
 
