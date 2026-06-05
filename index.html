@@ -90,7 +90,7 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            max-height: 350px;
+            max-height: 300px;
             overflow-y: auto;
             padding-right: 4px;
         }
@@ -166,14 +166,11 @@
             justify-content: center;
             position: relative;
         }
-        
-        /* El Canvas se escala visualmente, pero su resolución interna se mantiene intacta */
         canvas {
             max-width: 100%;
             max-height: 80vh;
             object-fit: contain; 
             display: block;
-            /* Fondo cuadriculado transparente (estilo Photoshop) para ver límites */
             background-image: linear-gradient(45deg, #111 25%, transparent 25%), 
                               linear-gradient(-45deg, #111 25%, transparent 25%), 
                               linear-gradient(45deg, transparent 75%, #111 75%), 
@@ -230,6 +227,14 @@
             </div>
         </div>
 
+        <div class="section">
+            <span class="section-title">Opciones Visuales</span>
+            <div class="control-group" style="display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" id="show-coords" checked style="width: auto; cursor: pointer;">
+                <label for="show-coords" style="margin-bottom: 0; cursor: pointer;">Ver coordenadas en lienzo</label>
+            </div>
+        </div>
+
         <div class="section" style="flex: 1; display: flex; flex-direction: column;">
             <span class="section-title">Archivos Cargados</span>
             <div class="layers-list" id="layers-list">
@@ -257,12 +262,13 @@
         const canvasHInput = document.getElementById('canvas-h');
         const imageUpload = document.getElementById('image-upload');
         const layersListContainer = document.getElementById('layers-list');
+        const showCoordsCheckbox = document.getElementById('show-coords');
         const btnExport = document.getElementById('btn-export');
         const infoBar = document.getElementById('info-bar');
 
-        let loadedMaps = []; // Array principal que guarda la información
+        let loadedMaps = [];
 
-        // 1. Gestionar el tamaño del Canvas
+        // Gestionar el tamaño del Canvas
         function updateCanvasSize() {
             let w, h;
             if (resolutionsSelect.value === 'custom') {
@@ -277,18 +283,18 @@
                 canvasWInput.value = w;
                 canvasHInput.value = h;
             }
-            // Cambiar tamaño real del canvas (no el visual)
             canvas.width = w;
             canvas.height = h;
             infoBar.textContent = `Resolución actual: ${w} x ${h} px`;
-            render(); // Al redimensionar, volvemos a dibujar
+            render();
         }
 
         resolutionsSelect.addEventListener('change', updateCanvasSize);
         canvasWInput.addEventListener('input', updateCanvasSize);
         canvasHInput.addEventListener('input', updateCanvasSize);
+        showCoordsCheckbox.addEventListener('change', render);
 
-        // 2. Subir archivo individual
+        // Subir archivo individual
         imageUpload.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file || file.type !== 'image/png') return;
@@ -297,18 +303,17 @@
             reader.onload = (event) => {
                 const img = new Image();
                 img.onload = () => {
-                    // Generar un ID único y guardar la data
                     const newMap = {
                         id: Date.now() + Math.random().toString(36).substring(2, 5),
                         name: file.name,
                         img: img,
-                        x: 0, // Inicia siempre en 0,0
+                        x: 0,
                         y: 0,
                         width: img.width,
                         height: img.height
                     };
                     loadedMaps.push(newMap);
-                    imageUpload.value = ''; // Resetear el input para permitir subir el mismo archivo de nuevo si se necesita
+                    imageUpload.value = '';
                     updateLayersUI();
                     render();
                 };
@@ -317,16 +322,15 @@
             reader.readAsDataURL(file);
         });
 
-        // 3. Generar la interfaz del menú lateral (Listado)
+        // Generar el listado lateral
         function updateLayersUI() {
-            layersListContainer.innerHTML = ''; // Limpiar la lista
+            layersListContainer.innerHTML = '';
             
             if (loadedMaps.length === 0) {
                 layersListContainer.innerHTML = '<div style="font-size:13px; color:#52525b; text-align:center; padding:20px;">Ningún archivo cargado</div>';
                 return;
             }
 
-            // Recorrer los mapas cargados para crear los controles
             loadedMaps.forEach((map) => {
                 const item = document.createElement('div');
                 item.className = 'layer-item';
@@ -336,7 +340,7 @@
                         <button class="btn-delete" data-id="${map.id}">Quitar</button>
                     </div>
                     <div style="font-size: 11px; color:#8d8d99; margin-bottom:6px;">
-                        Resolución nativa: ${map.width}x${map.height} px
+                        Resolución: ${map.width}x${map.height} px
                     </div>
                     <div class="row">
                         <div>
@@ -352,22 +356,22 @@
                 layersListContainer.appendChild(item);
             });
 
-            // Dar funcionalidad a los inputs numéricos de coordenadas
+            // Escuchar cambios numéricos
             document.querySelectorAll('.coord-input').forEach(input => {
                 input.addEventListener('input', (e) => {
                     const id = e.target.getAttribute('data-id');
                     const coord = e.target.getAttribute('data-coord');
-                    const value = parseInt(e.target.value) || 0; // Prevenir NaN
+                    const value = parseInt(e.target.value) || 0;
                     
                     const targetMap = loadedMaps.find(m => m.id === id);
                     if (targetMap) {
-                        targetMap[coord] = value; // Actualizar la coordenada X o Y
-                        render(); // Redibujar al instante
+                        targetMap[coord] = value;
+                        render();
                     }
                 });
             });
 
-            // Dar funcionalidad al botón de eliminar
+            // Quitar mapa
             document.querySelectorAll('.btn-delete').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const id = e.target.getAttribute('data-id');
@@ -378,36 +382,53 @@
             });
         }
 
-        // 4. Renderizar: Dibujar todo en el canvas
+        // Renderizar elementos en el Canvas
         function render() {
-            // Limpiar el lienzo antes de cada redibujado
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Dibujar cada imagen respetando sus coordenadas actuales
             loadedMaps.forEach(map => {
+                // 1. Dibujar el pixelmap original
                 ctx.drawImage(map.img, map.x, map.y, map.width, map.height);
+                
+                // 2. Capa técnica: Renderizar bordes e información de coordenadas
+                if (showCoordsCheckbox.checked) {
+                    // Contorno verde llamativo para identificar límites del bloque
+                    ctx.strokeStyle = '#04d361';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(map.x, map.y, map.width, map.height);
+                    
+                    // Cadena de texto con los datos de posición
+                    const labelText = `X: ${map.x} | Y: ${map.y}`;
+                    ctx.font = 'bold 12px monospace';
+                    const textWidth = ctx.measureText(labelText).width;
+                    
+                    // Fondo oscuro para asegurar contraste independientemente de los colores de la imagen
+                    ctx.fillStyle = 'rgba(18, 18, 20, 0.85)';
+                    ctx.fillRect(map.x, map.y, textWidth + 14, 22);
+                    
+                    // Dibujar el texto indicador
+                    ctx.fillStyle = '#04d361';
+                    ctx.fillText(labelText, map.x + 7, map.y + 15);
+                }
             });
         }
 
-        // 5. Exportar Canvas final
+        // Exportar a imagen física
         btnExport.addEventListener('click', () => {
             if (loadedMaps.length === 0) {
                 alert('No hay pixelmaps en el lienzo para exportar.');
                 return;
             }
-            
-            // Forzar un render limpio (por si acaso)
+            // Forzar renderizado para asegurar coherencia con el estado actual del checkbox
             render();
             
-            // Crear enlace temporal de descarga
             const link = document.createElement('a');
             link.download = `canvas_exportado_${canvas.width}x${canvas.height}.png`;
-            // El canvas.toDataURL exporta los píxeles reales, independientemente del zoom de pantalla
             link.href = canvas.toDataURL('image/png'); 
             link.click();
         });
 
-        // Inicialización al abrir la página
+        // Inicio por defecto
         updateCanvasSize();
     </script>
 </body>
